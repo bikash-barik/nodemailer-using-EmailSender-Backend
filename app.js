@@ -15,12 +15,14 @@ app.use(cors());
 
 app.use(fileUpload());
 
+app.get("/", (req, res) => {
+  res.send("Emails Sender APIs is running..");
+});
 app.post("/upload", async function (req, res) {
   try {
     /* File Upload*/
     let emailList;
     let emailListUplaodPath;
-
 
     let domainList;
     let domainListUplaodPath;
@@ -59,7 +61,6 @@ app.post("/upload", async function (req, res) {
     emails.pop();
     /* Reading Excel File Ends*/
 
-
     const workbook1 = xlsx.readFile(`./uploads/${domainList.name}`);
     const worksheet1 = workbook1.Sheets[workbook1.SheetNames[0]];
     const domains = [];
@@ -80,6 +81,17 @@ app.post("/upload", async function (req, res) {
       },
     });
 
+    //new
+    // var client = nodemailer.createTransport({
+    //   host: "smtp.hostinger.com",
+    //   port: 465,
+    //   auth: {
+    //     user: "info@shopnowonline.us",
+    //     pass: "Shop@123"
+    //   }
+    // });
+    //end
+
     // const options = {
     //     from: process.env.EMAIL,
     //     subject: subject,
@@ -96,8 +108,8 @@ app.post("/upload", async function (req, res) {
     for (let i = 0; i < emails.length; i++) {
       const options = {
         from: process.env.EMAIL,
-        subject: "Re : " + domains[i] + ":"+" " + subject,
-        text: "Hi" + domains[i] +""+ mailContent,
+        subject: "Re : " + domains[i] + ":" + " " + subject,
+        text: "Hi" + domains[i] + "" + mailContent,
         html: `<!DOCTYPE html>
         <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
         
@@ -111,82 +123,7 @@ app.post("/upload", async function (req, res) {
             <link href="https://fonts.googleapis.com/css?family=Bitter" rel="stylesheet" type="text/css" />
             <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css" />
             <!--<![endif]-->
-            <style>
-                * {
-                    box-sizing: border-box;
-                }
-        
-                body {
-                    margin: 0;
-                    padding: 0;
-                }
-        
-                a[x-apple-data-detectors] {
-                    color: inherit !important;
-                    text-decoration: inherit !important;
-                }
-        
-                #MessageViewBody a {
-                    color: inherit;
-                    text-decoration: none;
-                }
-        
-                p {
-                    line-height: inherit
-                }
-        
-                .desktop_hide,
-                .desktop_hide table {
-                    mso-hide: all;
-                    display: none;
-                    max-height: 0px;
-                    overflow: hidden;
-                }
-        
-                @media (max-width:660px) {
-        
-                    .desktop_hide table.icons-inner,
-                    .social_block.desktop_hide .social-table {
-                        display: inline-block !important;
-                    }
-        
-                    .icons-inner {
-                        text-align: center;
-                    }
-        
-                    .icons-inner td {
-                        margin: 0 auto;
-                    }
-        
-                    .image_block img.big,
-                    .row-content {
-                        width: 100% !important;
-                    }
-        
-                    .mobile_hide {
-                        display: none;
-                    }
-        
-                    .stack .column {
-                        width: 100%;
-                        display: block;
-                    }
-        
-                    .mobile_hide {
-                        min-height: 0;
-                        max-height: 0;
-                        max-width: 0;
-                        overflow: hidden;
-                        font-size: 0px;
-                    }
-        
-                    .desktop_hide,
-                    .desktop_hide table {
-                        display: table !important;
-                        max-height: none !important;
-                    }
-                }
-            </style>
+            
         </head>
         
         <body style="background-color: #fff; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
@@ -210,7 +147,6 @@ app.post("/upload", async function (req, res) {
         //   },
         // ],
       };
-
 
       // if (emails && emails.length > 0 && options && options.to) {
       //   await client.sendMail(options);
