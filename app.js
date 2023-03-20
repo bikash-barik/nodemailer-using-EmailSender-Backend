@@ -71,25 +71,25 @@ app.post("/upload", async function (req, res) {
     domains.pop();
 
     /* Sending Mails */
-    const client = nodemailer.createTransport({
-      service: "gmail",
+    // const client = nodemailer.createTransport({
+    //   service: "gmail",
+    //   auth: {
+    //     user: emailid,
+    //     // user: process.env.EMAIL,password
+    //     pass: password,
+    //     // pass: process.env.PASSWORD,
+    //   },
+    // });
+
+    // new
+    var client = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
       auth: {
         user: emailid,
-        // user: process.env.EMAIL,password
-        pass: password,
-        // pass: process.env.PASSWORD,
-      },
+        pass: password
+      }
     });
-
-    //new
-    // var client = nodemailer.createTransport({
-    //   host: "smtp.hostinger.com",
-    //   port: 465,
-    //   auth: {
-    //     user: "info@shopnowonline.us",
-    //     pass: "Shop@123"
-    //   }
-    // });
     //end
 
     // const options = {
