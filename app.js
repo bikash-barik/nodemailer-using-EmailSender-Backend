@@ -1,8 +1,8 @@
 const express = require("express");
 const fileUpload = require("express-fileupload");
 const nodemailer = require("nodemailer");
-const xlsx = require("xlsx");
 const cors = require("cors");
+const fs = require("fs");
 require("dotenv").config();
 
 const { createServer } = require("http");
@@ -18,17 +18,15 @@ app.use(fileUpload());
 app.get("/", (req, res) => {
   res.send("Emails Sender APIs is running..");
 });
+
 app.post("/upload", async function (req, res) {
   try {
-    /* File Upload*/
+    /* File Upload */
     let emailList;
     let emailListUplaodPath;
 
     let domainList;
     let domainListUplaodPath;
-
-    // let attachment;
-    // let attachmentUploadPath;
 
     let { subject, mailContent, emailid, password } = req.body;
     if (!req.files || Object.keys(req.files).length === 0) {
@@ -37,38 +35,23 @@ app.post("/upload", async function (req, res) {
     }
 
     emailList = req.files.emailList;
-    emailListUplaodPath = __dirname + "/upload/" + emailList.name;
+    emailListUplaodPath = __dirname + "/upload/" + emailList.name + ".txt";
+    fs.writeFileSync(emailListUplaodPath, emailList.data.toString());
 
     domainList = req.files.domainList;
-    domainListUplaodPath = __dirname + "/uploads/" + domainList.name;
+    domainListUplaodPath = __dirname + "/uploads/" + domainList.name + ".txt";
+    fs.writeFileSync(domainListUplaodPath, domainList.data.toString());
 
-    // attachment = req.files.attachment;
-    // attachmentUploadPath = __dirname + "/upload/" + attachment.name;
-
-    await emailList.mv(emailListUplaodPath);
-    await domainList.mv(domainListUplaodPath);
-    // await attachment.mv(attachmentUploadPath);
-    /* File Upload Ends*/
-
-    /* Reading Excel File */
-    const workbook = xlsx.readFile(`./upload/${emailList.name}`);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const emails = [];
-    for (let row in worksheet) {
-      emails.push(worksheet[row].v);
-    }
+    /* Reading Text File */
+    const emails = fs.readFileSync(emailListUplaodPath, { encoding: "utf8" }).split("\n");
     emails.shift();
     emails.pop();
-    /* Reading Excel File Ends*/
 
-    const workbook1 = xlsx.readFile(`./uploads/${domainList.name}`);
-    const worksheet1 = workbook1.Sheets[workbook1.SheetNames[0]];
-    const domains = [];
-    for (let row in worksheet1) {
-      domains.push(worksheet1[row].v);
-    }
+    const domains = fs.readFileSync(domainListUplaodPath, { encoding: "utf8" }).split("\n");
     domains.shift();
     domains.pop();
+    /* Reading Text File Ends*/
+
 
     /* Sending Mails */
     // const client = nodemailer.createTransport({
