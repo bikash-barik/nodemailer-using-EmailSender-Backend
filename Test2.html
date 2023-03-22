@@ -192,3 +192,98 @@
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//email validation
+app.post("/validate-emails", (req, res) => {
+  // if (!req.body || !req.body.emails) {
+  //   return res.status(400).json({ error: 'Missing or invalid request body' });
+  // }
+
+  let emailList;
+  let emailListUplaodPath;
+
+  // let { subject, mailContent, emailid, password } = req.body;
+  if (!req.files || Object.keys(req.files).length === 0) {
+    console.log("No files were uploaded");
+    return res.status(400).send("No files were uploaded.");
+  }
+
+  emailList = req.files.emailList;
+  emailListUplaodPath = __dirname + "/upload/" + emailList.name + ".txt";
+  fs.writeFileSync(emailListUplaodPath, emailList.data.toString());
+
+  const emails = fs
+    .readFileSync(emailListUplaodPath, { encoding: "utf8" })
+    .split("\n");
+  emails.shift();
+  emails.pop();
+
+  // const { emails } = req.body;
+  const validEmails = [];
+  const invalidEmails = [];
+
+  for (let email of emails) {
+    email = email.trim(); // remove whitespace
+    if (validator.validate(email)) {
+      validEmails.push(email);
+    } else {
+      invalidEmails.push(email);
+    }
+  }
+
+  res.json({ validEmails, invalidEmails });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+//email in body
+
+app.post('/validate-emails', (req, res) => {
+    if (!req.body || !req.body.emails) {
+      return res.status(400).json({ error: 'Missing or invalid request body' });
+    }
+  
+  
+    
+    
+    const { emails } = req.body;
+    const validEmails = [];
+    const invalidEmails = [];
+    
+    for (let email of emails) {
+      email = email.trim(); // remove whitespace  
+      if (validator.validate(email)) {
+        validEmails.push(email);
+      } else {
+        invalidEmails.push(email);
+      }
+    }
+    
+    res.json({ validEmails, invalidEmails });
+  });
+  

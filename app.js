@@ -1,8 +1,10 @@
 const express = require("express");
 const fileUpload = require("express-fileupload");
 const nodemailer = require("nodemailer");
+const validator = require('email-validator');
 const cors = require("cors");
 const fs = require("fs");
+const bodyParser = require('body-parser');
 require("dotenv").config();
 
 const { createServer } = require("http");
@@ -15,10 +17,57 @@ app.use(cors());
 
 app.use(fileUpload());
 
+app.use(bodyParser.json());
+
+
 app.get("/", (req, res) => {
   res.send("Emails Sender APIs is running..");
 });
 
+
+//email validation
+//email validation
+app.post("/validate-emails", (req, res) => {
+ 
+
+  let emailList;
+  let emailListUplaodPath;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    console.log("No files were uploaded");
+    return res.status(400).send("No files were uploaded.");
+  }
+
+  emailList = req.files.emailList;
+  emailListUplaodPath = __dirname + "/upload/" + emailList.name + ".txt";
+  fs.writeFileSync(emailListUplaodPath, emailList.data.toString());
+
+  const emails = fs
+    .readFileSync(emailListUplaodPath, { encoding: "utf8" })
+    .split("\n");
+  emails.shift();
+  emails.pop();
+
+  // const { emails } = req.body;
+  const validEmails = [];
+  const invalidEmails = [];
+
+  for (let email of emails) {
+    email = email.trim(); // remove whitespace
+    if (validator.validate(email)) {
+      validEmails.push(email);
+    } else {
+      invalidEmails.push(email);
+    }
+  }
+
+  res.json({ validEmails, invalidEmails });
+});
+
+
+
+
+// email sand
 app.post("/upload", async function (req, res) {
   try {
     /* File Upload */
