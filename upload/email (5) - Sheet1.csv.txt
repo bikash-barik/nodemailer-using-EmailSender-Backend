@@ -1,0 +1,7 @@
+Gmails,Domain
+barikbikashinfo@gmail.com,barikbikashinfo@gmail.com
+amiya.onlinemarketing@gmail.com,amiya.onlinemarketing@gmail.com
+sales@ijentech.com,sales@ijentech.com
+barikbikashinfo@gmail.com,barikbikashinfo@gmail.com
+amiya.onlinemarketing@gmail.com,amiya.onlinemarketing@gmail.com
+sales@ijentech.com,sales@ijentech.com
