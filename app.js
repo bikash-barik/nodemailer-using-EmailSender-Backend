@@ -45,33 +45,33 @@ const axios = require("axios");
 
 //get the data and show the data
 
-app.post("/uploadcsv", async function (req, res) {
+app.post("/uploadFiles", async function (req, res) {
   /* File Upload */
-  let emailList;
-  let emailListUplaodPath;
+  // let emailList;
+  // let emailListUplaodPath;
 
+  // console.log(domains)
   let domainList;
   let domainListUplaodPath;
-
   if (!req.files || Object.keys(req.files).length === 0) {
     console.log("No files were uploaded");
     return res.status(400).send("No files were uploaded.");
   }
 
-  emailList = req.files.emailList;
-  emailListUplaodPath = __dirname + "/upload/" + emailList.name + ".txt";
-  fs.writeFileSync(emailListUplaodPath, emailList.data.toString());
+  // emailList = req.files.emailList;
+  // emailListUplaodPath = __dirname + "/upload/" + emailList.name + ".txt";
+  // fs.writeFileSync(emailListUplaodPath, emailList.data.toString());
 
   domainList = req.files.domainList;
   domainListUplaodPath = __dirname + "/uploads/" + domainList.name + ".txt";
   fs.writeFileSync(domainListUplaodPath, domainList.data.toString());
 
   /* Reading Text File */
-  const emails = fs
-    .readFileSync(emailListUplaodPath, { encoding: "utf8" })
-    .split("\n");
-  emails.shift();
-  emails.pop();
+  // const emails = fs
+  //   .readFileSync(emailListUplaodPath, { encoding: "utf8" })
+  //   .split("\n");
+  // emails.shift();
+  // emails.pop();
 
   const domains = fs
     .readFileSync(domainListUplaodPath, { encoding: "utf8" })
@@ -79,7 +79,7 @@ app.post("/uploadcsv", async function (req, res) {
   domains.shift();
   domains.pop();
   /* Reading Text File Ends*/
-  res.json({ emails, domains });
+  res.json({ domains });
 });
 
 //email validation
