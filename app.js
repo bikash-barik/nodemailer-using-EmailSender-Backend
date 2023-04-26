@@ -46,11 +46,6 @@ const axios = require("axios");
 //get the data and show the data
 
 app.post("/uploadFiles", async function (req, res) {
-  /* File Upload */
-  // let emailList;
-  // let emailListUplaodPath;
-
-  // console.log(domains)
   let domainList;
   let domainListUplaodPath;
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -58,29 +53,172 @@ app.post("/uploadFiles", async function (req, res) {
     return res.status(400).send("No files were uploaded.");
   }
 
-  // emailList = req.files.emailList;
-  // emailListUplaodPath = __dirname + "/upload/" + emailList.name + ".txt";
-  // fs.writeFileSync(emailListUplaodPath, emailList.data.toString());
-
   domainList = req.files.domainList;
   domainListUplaodPath = __dirname + "/uploads/" + domainList.name + ".txt";
   fs.writeFileSync(domainListUplaodPath, domainList.data.toString());
-
-  /* Reading Text File */
-  // const emails = fs
-  //   .readFileSync(emailListUplaodPath, { encoding: "utf8" })
-  //   .split("\n");
-  // emails.shift();
-  // emails.pop();
 
   const domains = fs
     .readFileSync(domainListUplaodPath, { encoding: "utf8" })
     .split("\n");
   domains.shift();
   domains.pop();
-  /* Reading Text File Ends*/
   res.json({ domains });
 });
+
+//domain country name
+const dns = require("dns");
+const geoip = require("geoip-lite");
+
+// const domain = "csm.tech";
+
+// dns.lookup(domain, (err, address) => {
+//   if (err) {
+//     console.error(`Error verifying DNS: ${err}`);
+//   } else {
+//     const country = geoip.lookup(address)?.country;
+//     if (country) {
+//       console.log(`Country name: ${country}`);
+//     } else {
+//       console.error(`Error getting country name for domain ${domain}`);
+//     }
+//   }
+// });
+
+app.post("/domains", (req, res) => {
+  let domainList;
+  let domainListUplaodPath;
+console.log("hI")
+  if (!req.files || Object.keys(req.files).length === 0) {
+    console.log("No files were uploaded");
+    return res.status(400).send("No files were uploaded.");
+  }
+  console.log("hI")
+  
+  domainList = req.files.domainList;
+  domainListUplaodPath = __dirname + "/uploads/" + domainList.name + ".txt";
+  fs.writeFileSync(domainListUplaodPath, domainList.data.toString());
+
+  const domains = fs
+    .readFileSync(domainListUplaodPath, { encoding: "utf8" })
+    .split("\n")
+    .filter(
+      (domain) =>
+        ![
+          "blog",
+          "wordpress",
+          "gov",
+          "tumblr",
+          "multiply",
+          "tripod.com",
+          "org",
+          "ebay.com",
+          ".ac",
+          ".sh",
+          "church",
+          "typepad.com",
+          "tripadvisor.com",
+          ".hk",
+          ".pk",
+          "online",
+          "imdb.com",
+          "youtube.com",
+          ".tv",
+          "channel",
+          "news",
+          "press",
+          "apply",
+          "school",
+          "college",
+          "edu",
+          "javadevjournal.com",
+          ".in",
+          "facebook.com",
+          "twitter.com",
+          "pintrest",
+          "instragram",
+          "yellowpages.com",
+          "whitepages.com",
+          "walmart.com",
+          "expedia.com",
+          "media",
+          "groupon.com",
+          "telegraph",
+          "wayfair.com",
+          "nih.",
+          "apple.com",
+          "reddit.com",
+          "daily",
+          "today",
+          "cnet.com",
+          "glassdoor.com",
+          "target.com",
+          "yelp.com",
+          "indeed.com",
+          "justdial.com",
+          "ranker.com",
+          "customercare",
+          "domain",
+          "noreply",
+          "nobody",
+          "webmd.com",
+          "mapquest.com",
+          "glossier.com",
+          "fresh.com",
+          "manta.com",
+          "dailymail",
+          "weather.com",
+          "holiday",
+          "weleda.com",
+          "follain.com",
+          "agutsygirl.com",
+          "pcaskin.com",
+          "kiehls.com",
+          "cargurus.com",
+          "foursquare.com",
+          "animations.com",
+          "design",
+          "chron.com",
+          "people.com",
+          ".tech",
+          ".info",
+          "pcmag.com",
+          "google",
+        ].includes(domain.trim().toLowerCase())
+    );
+  domains.shift();
+  domains.pop();
+
+  const results = [];
+
+  const lookupPromise = (domain) => {
+    return new Promise((resolve, reject) => {
+      dns.lookup(domain, (err, address) => {
+        if (err) {
+          reject(err);
+        } else {
+          const country = geoip.lookup(address)?.country;
+          if (country) {
+            resolve({ domain, country });
+          } else {
+            reject(`Error getting country name for domain ${domain}`);
+          }
+        }
+      });
+    });
+  };
+
+  Promise.all(domains.map((domain) => lookupPromise(domain.trim())))
+    .then((results) => {
+      res.json(results);
+      // console.log(results);
+    })
+    .catch((err) => {
+      console.error(`Error verifying DNS: ${err}`);
+      res.status(500).send("Internal server error");
+    });
+});
+
+
 
 //email validation
 //email validation
@@ -315,157 +453,6 @@ app.post("/validate-emails", (req, res) => {
 //   res.json({ validEmails, invalidEmails });
 // });
 
-//domain country name
-const dns = require("dns");
-const geoip = require("geoip-lite");
-
-// const domain = "csm.tech";
-
-// dns.lookup(domain, (err, address) => {
-//   if (err) {
-//     console.error(`Error verifying DNS: ${err}`);
-//   } else {
-//     const country = geoip.lookup(address)?.country;
-//     if (country) {
-//       console.log(`Country name: ${country}`);
-//     } else {
-//       console.error(`Error getting country name for domain ${domain}`);
-//     }
-//   }
-// });
-
-app.post("/domains", (req, res) => {
-  let domainList;
-  let domainListUplaodPath;
-
-  if (!req.files || Object.keys(req.files).length === 0) {
-    console.log("No files were uploaded");
-    return res.status(400).send("No files were uploaded.");
-  }
-
-  domainList = req.files.domainList;
-  domainListUplaodPath = __dirname + "/uploads/" + domainList.name + ".txt";
-  fs.writeFileSync(domainListUplaodPath, domainList.data.toString());
-
-  const domains = fs
-    .readFileSync(domainListUplaodPath, { encoding: "utf8" })
-    .split("\n")
-    .filter(
-      (domain) =>
-        ![
-          "blog",
-          "wordpress",
-          "gov",
-          "tumblr",
-          "multiply",
-          "tripod.com",
-          "org",
-          "ebay.com",
-          ".ac",
-          ".sh",
-          "church",
-          "typepad.com",
-          "tripadvisor.com",
-          ".hk",
-          ".pk",
-          "online",
-          "imdb.com",
-          "youtube.com",
-          ".tv",
-          "channel",
-          "news",
-          "press",
-          "apply",
-          "school",
-          "college",
-          "edu",
-          "javadevjournal.com",
-          ".in",
-          "facebook.com",
-          "twitter.com",
-          "pintrest",
-          "instragram",
-          "yellowpages.com",
-          "whitepages.com",
-          "walmart.com",
-          "expedia.com",
-          "media",
-          "groupon.com",
-          "telegraph",
-          "wayfair.com",
-          "nih.",
-          "apple.com",
-          "reddit.com",
-          "daily",
-          "today",
-          "cnet.com",
-          "glassdoor.com",
-          "target.com",
-          "yelp.com",
-          "indeed.com",
-          "justdial.com",
-          "ranker.com",
-          "customercare",
-          "domain",
-          "noreply",
-          "nobody",
-          "webmd.com",
-          "mapquest.com",
-          "glossier.com",
-          "fresh.com",
-          "manta.com",
-          "dailymail",
-          "weather.com",
-          "holiday",
-          "weleda.com",
-          "follain.com",
-          "agutsygirl.com",
-          "pcaskin.com",
-          "kiehls.com",
-          "cargurus.com",
-          "foursquare.com",
-          "animations.com",
-          "design",
-          "chron.com",
-          "people.com",
-          ".tech",
-          ".info",
-          "pcmag.com",
-          "google",
-        ].includes(domain.trim().toLowerCase())
-    );
-  domains.shift();
-  domains.pop();
-
-  const results = [];
-
-  const lookupPromise = (domain) => {
-    return new Promise((resolve, reject) => {
-      dns.lookup(domain, (err, address) => {
-        if (err) {
-          reject(err);
-        } else {
-          const country = geoip.lookup(address)?.country;
-          if (country) {
-            resolve({ domain, country });
-          } else {
-            reject(`Error getting country name for domain ${domain}`);
-          }
-        }
-      });
-    });
-  };
-
-  Promise.all(domains.map((domain) => lookupPromise(domain.trim())))
-    .then((results) => {
-      res.json(results);
-      // console.log(results);
-    })
-    .catch((err) => {
-      console.error(`Error verifying DNS: ${err}`);
-      res.status(500).send("Internal server error");
-    });
-});
 
 //emailexractor
 const https = require("https");
@@ -503,31 +490,29 @@ https
 
 //api
 
-const puppeteer = require('puppeteer');
+const puppeteer = require("puppeteer");
 
-app.post('/extract-emails', async (req, res) => {
+app.post("/extract-emails", async (req, res) => {
   let domainList;
   let domainListUploadPath;
 
   if (!req.files || Object.keys(req.files).length === 0) {
-    console.log('No files were uploaded');
-    return res.status(400).send('No files were uploaded.');
+    console.log("No files were uploaded");
+    return res.status(400).send("No files were uploaded.");
   }
 
   domainList = req.files.domainList;
-  domainListUploadPath = __dirname + '/uploads/' + domainList.name + '.txt';
+  domainListUploadPath = __dirname + "/uploads/" + domainList.name + ".txt";
   fs.writeFileSync(domainListUploadPath, domainList.data.toString());
 
   const domains = fs
-    .readFileSync(domainListUploadPath, { encoding: 'utf8' })
-    .split('\n');
+    .readFileSync(domainListUploadPath, { encoding: "utf8" })
+    .split("\n");
   domains.shift();
   domains.pop();
   console.log(domains);
   const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
-  const bannedWords = [
-    'domain'
-  ];
+  const bannedWords = ["domain"];
 
   let emailAddresses = {};
 
@@ -548,19 +533,27 @@ app.post('/extract-emails', async (req, res) => {
       for (let j = 0; j < pages.length; j++) {
         const page = pages[j];
         const pageUrl = page.url();
-        const matches = await page.$$eval('a[href]', (links, bannedWords) =>
-          links.map(link => link.href.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi))
-            .filter(matches => matches !== null)
-            .flat()
-            .filter((match, index, self) => self.indexOf(match) === index)
-            .filter(match => {
-              for (let i = 0; i < bannedWords.length; i++) {
-                if (match.includes(bannedWords[i])) {
-                  return false;
+        const matches = await page.$$eval(
+          "a[href]",
+          (links, bannedWords) =>
+            links
+              .map((link) =>
+                link.href.match(
+                  /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi
+                )
+              )
+              .filter((matches) => matches !== null)
+              .flat()
+              .filter((match, index, self) => self.indexOf(match) === index)
+              .filter((match) => {
+                for (let i = 0; i < bannedWords.length; i++) {
+                  if (match.includes(bannedWords[i])) {
+                    return false;
+                  }
                 }
-              }
-              return true;
-            }), bannedWords
+                return true;
+              }),
+          bannedWords
         );
         if (matches && matches.length > 0) {
           emailAddresses[pageUrl] = matches;
@@ -572,18 +565,16 @@ app.post('/extract-emails', async (req, res) => {
 
     numResponsesReceived++;
     if (numResponsesReceived === numDomains) {
+      await browser.close();
       if (Object.keys(emailAddresses).length > 0) {
         res.send(emailAddresses);
         console.log(emailAddresses);
       } else {
-        res.send('No email addresses found in the uploaded file.');
+        res.send("No email addresses found in the uploaded file.");
       }
     }
   }
-
-  await browser.close();
 });
-
 
 
 // email sand
