@@ -1,115 +1,144 @@
 import asyncHandler from "express-async-handler";
 import SubUser from "../models/subUserModel.js";
 import User from "../models/userModel.js";
-import generateToken from "../utils/generateToken.js";
+const jwt = require('jsonwebtoken');
 
-//@description     Auth the user
-//@route           POST /api/users/login
-//@access          Public
-const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+const crypto = require('crypto');//generate a random token
+const nodemailer = require('nodemailer');
 
-  const user = await User.findOne({ email });
-  const subUser = await SubUser.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      pic: user.pic,
-      token: generateToken(user._id),
-    });
-  } else if (subUser && (await subUser.matchPassword(password))) {
-    res.json({
-      _id: subUser._id,
-      full_name: subUser.full_name,
-      sl_no: subUser.sl_no,
-      gender: subUser.gender,
-      date_of_birth: subUser.date_of_birth,
-      pic: subUser.pic,
-      office_phone: subUser.office_phone,
-      mobile_no: subUser.mobile_no,
-      email: subUser.email,
-      username: subUser.username,
-      privilege: subUser.privilege,
-      status: subUser.status,
-      token: generateToken(subUser._id),
-    });
-  } 
-  else {
-    res.status(401);
-    throw new Error("Invalid Email or Password");
+const registeruser = async function (req, res) {
+  try {
+    const data = req.body;
+    const { name, email, passward } = data
+    if (!name) {
+      return res.status(500).send({ status: false, message: "name is required" })
+
+    }
+    if (!(email)) {
+      return res.status(500).send({ status: false, message: "email is required" })
+
+    }
+    if (!(passward)) {
+      return res.status(500).send({ status: false, message: "password is required" })
+
+    }
+    const saveddata = await User.create(data);
+    res.status(201).send({status:true,data:saveddata})
+     
   }
-
-  
-
-});
-
-//@description     Register new user
-//@route           POST /api/users/
-//@access          Public
-const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, pic } = req.body;
-
-  const userExists = await User.findOne({ email });
-
-  if (userExists) {
-    res.status(404);
-    throw new Error("User already exists");
+  catch (err) {
+    return res.status(500).send({status:false,message:"internal server error"})
   }
+}
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-    pic,
-  });
 
-  if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      pic: user.pic,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("User not found");
-  }
-});
 
-// @desc    Update user profile
-// @route   Update /api/users/profile
-// @access  Private
-const updateUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
+const login = async function (req, res) {
+  try {
+    const { email, password } = req.body;
 
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    user.pic = req.body.pic || user.pic;
-    if (req.body.password) {
-      user.password = req.body.password;
+    // Validate email and password
+    if (!email) {
+      return res.status(400).send({ status: false, message: "Email is required" });
+    }
+    if (!password) {
+      return res.status(400).send({ status: false, message: "Password is required" });
     }
 
-    const updatedUser = await user.save();
+    const user = await User.findOne({ email, password });
 
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      pic: updatedUser.pic,
-      isAdmin: updatedUser.isAdmin,
-      token: generateToken(updatedUser._id),
-    });
-  } else {
-    res.status(404);
-    throw new Error("User Not Found");
+    if (!user) {
+      return res.status(401).send({ status: false, message: "Invalid email or password" });
+    }
+
+
+    const token = jwt.sign({ email: user.email }, 'secret-key', { expiresIn: '1h' });
+
+
+    res.status(200).send({ status: true, token });
+
+  } catch (err) {
+    return res.status(500).send({ status: false, message: "Internal server error" });
   }
-});
+}
 
-export { authUser, updateUserProfile, registerUser };
+
+
+const forgotPassword = async function (req, res) {
+  try {
+    const { email } = req.body;
+
+    // Validate email
+    if (!email) {
+      return res.status(400).send({ status: false, message: "Email is required" });
+    }
+
+  
+    const resetToken = crypto.randomBytes(20).toString('mmm');
+
+
+    await User.findOneAndUpdate({ email }, { resetToken });
+
+ 
+    const transporter = nodemailer.createTransport({
+    });
+
+    const mailOptions = {
+      from: 'your-email@example.com',
+      to: email,
+      subject: 'Password Reset',
+      text: `reset your password: ${resetToken}`
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).send({ status: true, message: "Password reset email sent" });
+
+  } catch (err) {
+    return res.status(500).send({ status: false, message: "Internal server error" });
+  }
+}
+
+const resetPassword = async function (req, res) {
+  try {
+    const { resetToken, newPassword } = req.body;
+
+    if (!resetToken) {
+      return res.status(400).send({ status: false, message: "Reset token is required" });
+    }
+    if (!newPassword) {
+      return res.status(400).send({ status: false, message: "New password is required" });
+    }
+
+
+    const user = await User.findOne({ resetToken });
+
+
+    if (!user) {
+      return res.status(401).send({ status: false, message: "Invalid reset token" });
+    }
+
+
+    user.password = newPassword;
+    user.resetToken = undefined;
+    await user.save();
+
+    res.status(200).send({ status: true, message: "Password reset successful" });
+
+  } catch (err) {
+    return res.status(500).send({ status: false, message: "Internal server error" });
+  }
+}
+
+
+
+
+ module.exports = { registeruser, login, forgotPassword, resetPassword }
+
+
+
+
+
+
+

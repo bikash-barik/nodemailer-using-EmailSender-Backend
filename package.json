@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "csv-parser": "^3.0.0",
     "deep-email-validator": "^0.1.21",
     "dns": "^0.2.2",
@@ -24,12 +26,14 @@
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
     "express-fileupload": "^1.4.0",
+    "fs": "^0.0.1-security",
     "geoip-lite": "^1.4.7",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.3",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.8.0",
+    "nodemailer": "^6.9.3",
+    "nodemon": "^2.0.22",
     "puppeteer": "^19.8.3",
     "qs": "^6.11.1",
     "request": "^2.88.2",
