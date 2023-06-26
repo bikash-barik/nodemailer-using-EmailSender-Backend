@@ -7,6 +7,8 @@ import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
 import subUserRoutes from "./routes/subUserRoutes.js";
 import uploadFileRoutes from "./routes/Manage Application/uploadFileRouters.js";
+const fileUpload = require("express-fileupload");
+const emailRoutes = require("./routes/emailRoutes");
 
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
@@ -20,10 +22,12 @@ const app = express(); // main thing
 app.use(cors());
 // app.use(cors({origin: 'https://websyetem.online'}));http://localhost:5000/
 app.use(express.json()); // to accept json data
-
+app.use(fileUpload());
 
 app.use("/api/users", userRoutes);
 app.use("/api/subUsers", subUserRoutes);
+//Emails send api
+app.use("/emailsend", emailRoutes);
 
 
 // Manage Application
