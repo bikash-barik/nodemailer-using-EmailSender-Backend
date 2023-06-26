@@ -352,106 +352,106 @@ app.post("/validate-emails", (req, res) => {
   res.json({ validEmails, invalidEmails });
 });
 
-// app.post("/validate-emails", async (req, res) => {
-//   let emailList;
-//   let emailListUploadPath;
+app.post("/validate-emails", async (req, res) => {
+  let emailList;
+  let emailListUploadPath;
 
-//   if (!req.files || Object.keys(req.files).length === 0) {
-//     console.log("No files were uploaded");
-//     return res.status(400).send("No files were uploaded.");
-//   }
+  if (!req.files || Object.keys(req.files).length === 0) {
+    console.log("No files were uploaded");
+    return res.status(400).send("No files were uploaded.");
+  }
 
-//   emailList = req.files.emailList;
-//   emailListUploadPath = __dirname + "/upload/" + emailList.name + ".txt";
-//   fs.writeFileSync(emailListUploadPath, emailList.data.toString());
-//   const emails = fs
-//     .readFileSync(emailListUploadPath, { encoding: "utf8" })
-//     .split("\n");
-//   emails.shift();
-//   emails.pop();
-//   const validEmails = [];
-//   const invalidEmails = [];
-//   console.log(emails);
-//   for (let email of emails) {
-//     email = email.trim(); // remove whitespace
-//     const { wellFormed, validDomain, validMailbox } = await deepEmailValidator.validate(email);
-//     console.log("well"+wellFormed);
-//     if (wellFormed && validDomain && validMailbox) {
-//       validEmails.push(email);
-//     } else {
-//       invalidEmails.push(email);
-//     }
-//   }
+  emailList = req.files.emailList;
+  emailListUploadPath = __dirname + "/upload/" + emailList.name + ".txt";
+  fs.writeFileSync(emailListUploadPath, emailList.data.toString());
+  const emails = fs
+    .readFileSync(emailListUploadPath, { encoding: "utf8" })
+    .split("\n");
+  emails.shift();
+  emails.pop();
+  const validEmails = [];
+  const invalidEmails = [];
+  console.log(emails);
+  for (let email of emails) {
+    email = email.trim(); // remove whitespace
+    const { wellFormed, validDomain, validMailbox } = await deepEmailValidator.validate(email);
+    console.log("well"+wellFormed);
+    if (wellFormed && validDomain && validMailbox) {
+      validEmails.push(email);
+    } else {
+      invalidEmails.push(email);
+    }
+  }
 
-//   res.json({ validEmails, invalidEmails });
-// });
+  res.json({ validEmails, invalidEmails });
+});
 
-//properly with api mail validator
+// properly with api mail validator
 
-// app.post("/validate-emails", async (req, res) => {
-//   let emailList;
-//   let emailListUploadPath;
+app.post("/validate-emails", async (req, res) => {
+  let emailList;
+  let emailListUploadPath;
 
-//   if (!req.files || Object.keys(req.files).length === 0) {
-//     console.log("No files were uploaded");
-//     return res.status(400).send("No files were uploaded.");
-//   }
+  if (!req.files || Object.keys(req.files).length === 0) {
+    console.log("No files were uploaded");
+    return res.status(400).send("No files were uploaded.");
+  }
 
-//   emailList = req.files.emailList;
-//   emailListUploadPath = __dirname + "/upload/" + emailList.name + ".txt";
-//   fs.writeFileSync(emailListUploadPath, emailList.data.toString());
+  emailList = req.files.emailList;
+  emailListUploadPath = __dirname + "/upload/" + emailList.name + ".txt";
+  fs.writeFileSync(emailListUploadPath, emailList.data.toString());
 
-//   const emails = fs
-//     .readFileSync(emailListUploadPath, { encoding: "utf8" })
-//     .split("\n");
-//   emails.shift();
-//   emails.pop();
+  const emails = fs
+    .readFileSync(emailListUploadPath, { encoding: "utf8" })
+    .split("\n");
+  emails.shift();
+  emails.pop();
 
-//   const validEmails = [];
-//   const invalidEmails = [];
+  const validEmails = [];
+  const invalidEmails = [];
 
-//   for (let email of emails) {
-//     email = email.trim(); // remove whitespace
+  for (let email of emails) {
+    email = email.trim(); // remove whitespace
 
-//     const params = {
-//       api_key: "8d9b2658c2084b4fb121d987fee82c5f",
-//       email: email,
-//       ip_address: req.ip,
-//     };
+    const params = {
+      api_key: "8d9b2658c2084b4fb121d987fee82c5f",
+      email: email,
+      ip_address: req.ip,
+    };
 
-//     try {
-//       const response = await axios.get(
-//         "https://api.zerobounce.net/v2/validate",
-//         {
-//           params: params,
-//         }
-//       );
+    try {
+      const response = await axios.get(
+        "https://api.zerobounce.net/v2/validate",
+        {
+          params: params,
+        }
+      );
 
-//       const { status,domain } = response.data;
-//       console.log(domain)
-//       if (validator.validate(email)) {
-//         if (status === "valid") {
-//           validEmails.push(email);
-//         } else if (status === "undefined") {
-//           validEmails.push(email);
-//         }else if (status === "catch-all") {
-//           invalidEmails.push(`${email} is a catch-all address`);
-//         }else if (status === "unknown") {
-//           invalidEmails.push(`${email} is an unknown address`);
-//         } else {
-//           invalidEmails.push(email);
-//         }
-//       } else {
-//         invalidEmails.push(email);
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       invalidEmails.push(email);
-//     }
-//   }
+      const { status,domain } = response.data;
+      console.log(domain)
+      if (validator.validate(email)) {
+        if (status === "valid") {
+          validEmails.push(email);
+        } else if (status === "undefined") {
+          validEmails.push(email);
+        }else if (status === "catch-all") {
+          invalidEmails.push(`${email} is a catch-all address`);
+        }else if (status === "unknown") {
+          invalidEmails.push(`${email} is an unknown address`);
+        } else {
+          invalidEmails.push(email);
+        }
+      } else {
+        invalidEmails.push(email);
+      }
+    } catch (error) {
+      console.error(error);
+      invalidEmails.push(email);
+    }
+  }
 
-//   res.json({ validEmails, invalidEmails });
-// });
+  res.json({ validEmails, invalidEmails });
+});
 
 
 //emailexractor
@@ -577,139 +577,73 @@ app.post("/extract-emails", async (req, res) => {
 });
 
 
-// email sand
+//-----------------------------------------------------------------------------------------
+
+
+
+// email send
 app.post("/upload", async function (req, res) {
   try {
-    /* File Upload */
-    let emailList;
-    let emailListUplaodPath;
+    const { subject, mailContent, emailid, password } = req.body;
 
-    let domainList;
-    let domainListUplaodPath;
-
-    let { subject, mailContent, emailid, password } = req.body;
+    const files = req.files;
+    // Check if files were uploaded
     if (!req.files || Object.keys(req.files).length === 0) {
       console.log("No files were uploaded");
       return res.status(400).send("No files were uploaded.");
     }
 
-    emailList = req.files.emailList;
-    emailListUplaodPath = __dirname + "/upload/" + emailList.name + ".txt";
-    fs.writeFileSync(emailListUplaodPath, emailList.data.toString());
+    // Access the uploaded files
+    const emailList = req.files.emailList;
+    const domainList = req.files.domainList;
 
-    domainList = req.files.domainList;
-    domainListUplaodPath = __dirname + "/uploads/" + domainList.name + ".txt";
-    fs.writeFileSync(domainListUplaodPath, domainList.data.toString());
+    // Specify the paths to save the files
+    const emailListUploadPath = __dirname + "/uploads/" + emailList.name + ".txt";
+    const domainListUploadPath = __dirname + "/uploads/" + domainList.name + ".txt";
 
-    /* Reading Text File */
-    const emails = fs
-      .readFileSync(emailListUplaodPath, { encoding: "utf8" })
-      .split("\n");
-    emails.shift();
-    emails.pop();
+    // Save the files to the specified paths
+    await emailList.mv(emailListUploadPath);
+    await domainList.mv(domainListUploadPath);
 
-    const domains = fs
-      .readFileSync(domainListUplaodPath, { encoding: "utf8" })
-      .split("\n");
-    domains.shift();
-    domains.pop();
-    /* Reading Text File Ends*/
+    /* Reading Text Files */
+    const fs = require("fs");
+
+    const emails = fs.readFileSync(emailListUploadPath, { encoding: "utf8" })
+      .split("\n")
+      .filter((email) => email.trim() !== ""); // Remove empty lines
+
+    const domains = fs.readFileSync(domainListUploadPath, { encoding: "utf8" })
+      .split("\n")
+      .filter((domain) => domain.trim() !== ""); // Remove empty lines
+    /* Reading Text Files Ends*/
 
     /* Sending Mails */
-    // const client = nodemailer.createTransport({
-    //   service: "gmail",
-    //   auth: {
-    //     user: emailid,
-    //     // user: process.env.EMAIL,password
-    //     pass: password,
-    //     // pass: process.env.PASSWORD,
-    //   },
-    // });
+    const nodemailer = require("nodemailer");
 
-    // new
-    var client = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
       auth: {
         user: emailid,
         pass: password,
       },
     });
-    //end
-
-    // const options = {
-    //     from: process.env.EMAIL,
-    //     subject: subject,
-
-    //     text: emails + mailContent,
-    //     attachments: [
-    //         {
-    //             filename: attachment.name,
-    //             path: './upload/'+attachment.name
-    //         }
-    //     ]
-    // }
 
     for (let i = 0; i < emails.length; i++) {
       const options = {
-        from: process.env.EMAIL,
-        subject: "Re : " + domains[i] + ":" + " " + subject,
-        text: "Hi" + domains[i] + "" + mailContent,
-        html: `<!DOCTYPE html>
-        <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
-        
-        <head>
-            <title></title>
-            <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-            <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-            <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]-->
-            <!--[if !mso]><!-->
-            <link href="https://fonts.googleapis.com/css?family=Alegreya" rel="stylesheet" type="text/css" />
-            <link href="https://fonts.googleapis.com/css?family=Bitter" rel="stylesheet" type="text/css" />
-            <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css" />
-            <!--<![endif]-->
-            
-        </head>
-        
-        <body style="background-color: #fff; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
-        
-            <h2>Hi ${domains[i]}</h2>
-        
-        
-            ${mailContent}
-        
-        
-        
-        
-        
-        </body>
-        
-        </html>`,
-        // attachments: [
-        //   {
-        //     filename: attachment.name,
-        //     path: "./upload/" + attachment.name,
-        //   },
-        // ],
+        from: emailid,
+        to: emails[i],
+        subject: `Re: ${domains[i]} - ${subject}`,
+        text: `Hi ${domains[i]},\n\n${mailContent}`,
       };
 
-      // if (emails && emails.length > 0 && options && options.to) {
-      //   await client.sendMail(options);
-      //   console.log("Success: " + options.to);
-      //   io.emit("mailSuccess", { email: options.to });
-      // } else {
-      //   console.log("No recipients defined");
-      // }
-
-      options.to = emails[i];
-      await client.sendMail(options);
+      await transporter.sendMail(options);
       console.log("Success: " + options.to);
       io.emit("mailSuccess", { email: options.to });
     }
     /* Sending Mails Ends*/
 
     return res.status(200).json({
-      message: "Email sent successfully",
+      message: "Emails sent successfully",
     });
   } catch (error) {
     console.log(error);
@@ -719,6 +653,10 @@ app.post("/upload", async function (req, res) {
     });
   }
 });
+
+
+//-----------------------------------------------------------------------------------------------
+
 
 const server = createServer(app);
 
